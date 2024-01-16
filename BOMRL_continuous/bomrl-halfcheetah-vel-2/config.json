@@ -1,0 +1,34 @@
+{
+  "env-name": "HalfCheetahVel-v2",
+  "env-kwargs": {
+    "low": 0.0,
+    "high": 2.0,
+    "normalization_scale": 10.0,
+    "max_episode_steps": 200
+  },
+  "gamma": 0.99,
+  "gae-lambda": 1.0,
+  "first-order": true,
+  "hidden-sizes": [
+    64,
+    64
+  ],
+  "nonlinearity": "tanh",
+  "fast-batch-size": 20,
+  "num-steps": 2,
+  "fast-lr": 0.1,
+  "num-batches": 500,
+  "meta-batch-size": 40,
+  "max-kl": 0.01,
+  "cg-iters": 10,
+  "cg-damping": 1e-05,
+  "ls-max-steps": 15,
+  "ls-backtrack-ratio": 0.8,
+  "index": 2,
+  "config": "configs/maml/halfcheetah-vel.yaml",
+  "output_folder": "maml-halfcheetah-vel",
+  "seed": 1,
+  "num_workers": 2,
+  "use_cuda": false,
+  "device": "cpu"
+}
