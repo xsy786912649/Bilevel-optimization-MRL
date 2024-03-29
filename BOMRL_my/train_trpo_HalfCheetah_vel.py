@@ -31,7 +31,7 @@ parser.add_argument('--meta-reg', type=float, default=0.001, metavar='G',
                     help='meta regularization regression (default: 0.0)') 
 parser.add_argument('--meta-lambda', type=float, default=0.5, metavar='G', 
                     help='meta meta-lambda (default: 0.5)')  
-parser.add_argument('--max-kl', type=float, default=3e-2, metavar='G',
+parser.add_argument('--max-kl', type=float, default=1e-2, metavar='G',
                     help='max kl value (default: 1e-2)')
 parser.add_argument('--damping', type=float, default=0e-5, metavar='G',
                     help='damping (default: 0e-1)')
@@ -39,7 +39,7 @@ parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 1)')
 parser.add_argument('--batch-size', type=int, default=20, metavar='N',
                     help='batch-size (default: 20)') 
-parser.add_argument('--task-batch-size', type=int, default=5, metavar='N',
+parser.add_argument('--task-batch-size', type=int, default=10, metavar='N',
                     help='task-batch-size (default: 5)')
 parser.add_argument('--render', action='store_true',
                     help='render the environment')
@@ -298,7 +298,7 @@ if __name__ == "__main__":
 
     aaaaaa=-10000
 
-    for i_episode in range(300):
+    for i_episode in range(500):
         print("i_episode: ",i_episode)
         meta_lambda_now=args.meta_lambda
         print("meta_lambda_now: ",meta_lambda_now)
@@ -407,15 +407,15 @@ if __name__ == "__main__":
 
         print("result_before: ",result_before.mean())
         print("result_after: ",result_after.mean())
-        with open('./check_point/HalfCheetah_vel_training_log.csv', 'a+') as file:
+        with open('./check_point/training_log_HalfCheetah_vel_'+str(index)+'.csv', 'a+') as file:
             writer = csv.writer(file)
             writer.writerow([i_episode, result_after.mean()])
 
         if result_after.mean()>aaaaaa:
             print("save model")
             aaaaaa=result_after.mean()
-            torch.save(meta_policy_net, "./check_point/meta_policy_net_HalfCheetah_vel.pkl")
-            output_hal = open("./check_point/running_state_HalfCheetah_vel.pkl", 'wb')
+            torch.save(meta_policy_net, "./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+"pkl")
+            output_hal = open("./check_point/running_state_HalfCheetah_vel_"+str(index)+".pkl", 'wb')
             str1 = pickle.dumps(running_state)
             output_hal.write(str1)
             output_hal.close()

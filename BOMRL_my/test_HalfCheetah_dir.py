@@ -18,7 +18,7 @@ from copy import deepcopy
 from train_trpo_HalfCheetah_dir import model_lower,args,env,index,num_inputs, num_actions,select_action_test,select_action,compute_adavatage,task_specific_adaptation
 
 running_state=0
-with open("./check_point/running_state_HalfCheetah_dir.pkl",'rb') as file:
+with open("./check_point/running_state_HalfCheetah_dir_"+str(index)+".pkl",'rb') as file:
     running_state  = pickle.loads(file.read())
 
 def sample_data_for_task_specific(target_v,policy_net,batch_size):
@@ -111,7 +111,7 @@ def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
 
 if __name__ == "__main__":
 
-    meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_dir.pkl")
+    meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_dir_"+str(index)+".pkl")
 
     meta_lambda_now=args.meta_lambda
     print(meta_lambda_now)
