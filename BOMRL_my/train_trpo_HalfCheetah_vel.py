@@ -281,10 +281,10 @@ def loss_obain_new(task_specific_policy,meta_policy_net_copy,after_batch,after_q
     return J_loss
 
 if __name__ == "__main__":
-    if not os.path.exists("./check_point/meta_policy_net.pkl"):
+    if not os.path.exists( "./check_point/meta_policy_net_HalfCheetah_vel.pkl"):
         meta_policy_net = Policy(num_inputs, num_actions)
     else:
-        meta_policy_net = torch.load("./check_point/meta_policy_net.pkl")
+        meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_vel.pkl")
 
     "--------------------------------------------------for initialization of running_state------------------------------------------"
     for i in range(args.batch_size*5):
