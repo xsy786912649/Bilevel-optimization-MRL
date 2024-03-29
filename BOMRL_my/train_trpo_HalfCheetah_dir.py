@@ -75,8 +75,8 @@ elif args.lower_opt=="sgd":
     model_lower="SGD"
 
 running_state = ZFilter((num_inputs,), clip=5)
-if os.path.exists("./check_point/running_state_HalfCheetah_dir.pkl"):
-    with open("./check_point/running_state_HalfCheetah_dir.pkl",'rb') as file:
+if os.path.exists("./check_point/running_state_HalfCheetah_dir_"+str(index)+".pkl"):
+    with open("./check_point/running_state_HalfCheetah_dir_"+str(index)+".pkl",'rb') as file:
         running_state  = pickle.loads(file.read())
 
 print(model_lower, "running_state: ",running_state.rs.n) 
@@ -280,10 +280,10 @@ def loss_obain_new(task_specific_policy,meta_policy_net_copy,after_batch,after_q
 
 
 if __name__ == "__main__":
-    if not os.path.exists("./check_point/meta_policy_net.pkl"):
+    if not os.path.exists("./check_point/meta_policy_net_HalfCheetah_dir_"+str(index)+".pkl"):
         meta_policy_net = Policy(num_inputs, num_actions)
     else:
-        meta_policy_net = torch.load("./check_point/meta_policy_net.pkl")
+        meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_dir_"+str(index)+".pkl")
 
     "--------------------------------------------------for initialization of running_state------------------------------------------"
     for i in range(args.batch_size*5):
