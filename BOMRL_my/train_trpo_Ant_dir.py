@@ -37,8 +37,8 @@ parser.add_argument('--damping', type=float, default=0e-5, metavar='G',
                     help='damping (default: 0e-1)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 1)')
-parser.add_argument('--batch-size', type=int, default=20, metavar='N',
-                    help='batch-size (default: 20)') 
+parser.add_argument('--batch-size', type=int, default=40, metavar='N',
+                    help='batch-size (default: 40)') 
 parser.add_argument('--task-batch-size', type=int, default=4, metavar='N',
                     help='task-batch-size (default: 4)')
 parser.add_argument('--render', action='store_true',
@@ -58,7 +58,7 @@ torch.manual_seed(args.seed)
 #    env = gym.make(args.env_name,exclude_current_positions_from_observation=False)
 #else:
 #    env = gym.make(args.env_name)
-env = gym.make(args.env_name)
+env = gym.make(args.env_name,use_contact_forces=True)
 num_inputs = env.observation_space.shape[0]
 num_actions = env.action_space.shape[0]
 
@@ -107,8 +107,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
         for t in range(args.max_length):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
-            next_state, reward, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v-0.5 * 1e-1 * np.sum(np.square(action))
+            next_state, reward_ori, done, truncated, info = env.step(action)
+            reward=info['x_velocity']*target_v+reward_ori-info['x_velocity']+0.05
             reward_sum += reward
             next_state = running_state(next_state)
             path_number = i
@@ -124,8 +124,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
         for t in range(args.max_length):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
-            next_state, reward, done, truncated, info= env.step(action)
-            reward=info['x_velocity']*target_v-0.5 * 1e-1 * np.sum(np.square(action))
+            next_state, reward_ori, done, truncated, info = env.step(action)
+            reward=info['x_velocity']*target_v+reward_ori-info['x_velocity']+0.05
             next_state = running_state(next_state)
             path_number = i
 

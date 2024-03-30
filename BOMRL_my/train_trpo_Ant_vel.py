@@ -111,7 +111,7 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward_ori, done, truncated, info = env.step(action)
-            reward=-abs(info['x_velocity']-target_v)+reward_ori-info['x_velocity']
+            reward=-abs(info['x_velocity']-target_v)+reward_ori-info['x_velocity']+0.05
 
             reward_sum += reward
             next_state = running_state(next_state)
@@ -129,7 +129,7 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward_ori, done, truncated, info= env.step(action)
-            reward=-abs(info['x_velocity']-target_v)+reward_ori-info['x_velocity']
+            reward=-abs(info['x_velocity']-target_v)+reward_ori-info['x_velocity']+0.05
             next_state = running_state(next_state)
             path_number = i
 
