@@ -58,7 +58,7 @@ torch.manual_seed(args.seed)
 #    env = gym.make(args.env_name,exclude_current_positions_from_observation=False)
 #else:
 #    env = gym.make(args.env_name)
-env = gym.make(args.env_name,use_contact_forces=True)
+env = gym.make(args.env_name)
 num_inputs = env.observation_space.shape[0]
 num_actions = env.action_space.shape[0]
 
@@ -108,7 +108,7 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward_ori, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v+reward_ori-info['x_velocity']+0.05
+            reward=info['x_velocity']*target_v+0.05+info["reward_survive"]+info["reward_ctrl"]* 1e-2
             reward_sum += reward
             next_state = running_state(next_state)
             path_number = i
@@ -125,7 +125,7 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward_ori, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v+reward_ori-info['x_velocity']+0.05
+            reward=info['x_velocity']*target_v+0.05+info["reward_survive"]+info["reward_ctrl"]* 1e-2
             next_state = running_state(next_state)
             path_number = i
 
