@@ -122,7 +122,7 @@ if __name__ == "__main__":
     accumulated_raward_k_adaptation2=[[],[],[],[]]
     accumulated_raward_k_adaptation3=[[],[],[],[]]
 
-    for task_number in range(20):
+    for task_number in range(30):
         target_v=task_number * 0.1 
         print("task_number: ",task_number, " target_v: ", target_v) 
 

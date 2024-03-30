@@ -142,7 +142,7 @@ if __name__ == "__main__":
             print('(adaptation {}) \tAverage reward {:.2f}'.format(iteration_number, accumulated_raward_batch))
             print('(adaptation {}) \tAverage reward {:.2f}'.format(iteration_number, accumulated_raward_batch2))
 
-            if task_number >0:
+            if task_number >=0:
                 accumulated_raward_k_adaptation[iteration_number].append(accumulated_raward_batch)
                 accumulated_raward_k_adaptation2[iteration_number].append(accumulated_raward_batch2)
                 accumulated_raward_k_adaptation3[iteration_number].append(max(accumulated_raward_batch,accumulated_raward_batch2))
