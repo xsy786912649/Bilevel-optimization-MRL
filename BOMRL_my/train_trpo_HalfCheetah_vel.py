@@ -281,10 +281,10 @@ def loss_obain_new(task_specific_policy,meta_policy_net_copy,after_batch,after_q
     return J_loss
 
 if __name__ == "__main__":
-    if not os.path.exists("./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+"pkl"):
+    if not os.path.exists("./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+".pkl"):
         meta_policy_net = Policy(num_inputs, num_actions)
     else:
-        meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+"pkl")
+        meta_policy_net = torch.load("./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+".pkl")
 
     "--------------------------------------------------for initialization of running_state------------------------------------------"
     for i in range(args.batch_size*5):
@@ -414,7 +414,7 @@ if __name__ == "__main__":
         if result_after.mean()>aaaaaa:
             print("save model")
             aaaaaa=result_after.mean()
-            torch.save(meta_policy_net, "./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+"pkl")
+            torch.save(meta_policy_net, "./check_point/meta_policy_net_HalfCheetah_vel_"+str(index)+".pkl")
             output_hal = open("./check_point/running_state_HalfCheetah_vel_"+str(index)+".pkl", 'wb')
             str1 = pickle.dumps(running_state)
             output_hal.write(str1)
