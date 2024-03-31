@@ -46,8 +46,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            if done or truncated:
-                break
+            #if done or truncated:
+            #    break
     
         env._elapsed_steps=0
         for t in range(args.max_length):
@@ -62,8 +62,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            if done or truncated:
-                break
+            #if done or truncated:
+            #    break
 
         num_episodes += 1
         accumulated_raward_batch += reward_sum
