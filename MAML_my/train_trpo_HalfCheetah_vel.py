@@ -175,11 +175,13 @@ def task_specific_adaptation(task_specific_policy,meta_policy_net,batch,q_values
 
 
     grads_list = torch.autograd.grad(loss, meta_policy_net.parameters(), create_graph=True, retain_graph=True)
+    new_parameter_withgrad=[]
     for i,param in enumerate(task_specific_policy.parameters()):
-        param = list(meta_policy_net.parameters())[i] - meta_lr * grads_list[i]
-        param.retain_grad()
-
-    return task_specific_policy
+        new_parameter_withgrad.append(list(meta_policy_net.parameters())[i] - meta_lr * grads_list[i])
+        new_parameter_withgrad[i].retain_grad()
+        param.data = new_parameter_withgrad[i].data
+        
+    return task_specific_policy, new_parameter_withgrad
 
 def task_specific_adaptation_nograd(task_specific_policy,meta_policy_net,batch,q_values,meta_lr): 
     actions = torch.Tensor(np.concatenate(batch.action, 0))
@@ -193,7 +195,7 @@ def task_specific_adaptation_nograd(task_specific_policy,meta_policy_net,batch,q
     aaaa=torch.exp(log_prob - Variable(fixed_log_prob))
     action_loss = -Variable(q_values) *  torch.special.expit(2.0*aaaa-2.0)*2 
     #action_loss = -Variable(q_values) * aaaa
-    loss= action_loss.mean()     
+    loss= action_loss.mean()  
 
     grads_list = torch.autograd.grad(loss, meta_policy_net.parameters(), retain_graph=False)
     for i,param in enumerate(task_specific_policy.parameters()):
@@ -201,10 +203,10 @@ def task_specific_adaptation_nograd(task_specific_policy,meta_policy_net,batch,q
 
     return task_specific_policy
 
-def policy_gradient_obain(task_specific_policy,task_specific_policy_copy,after_batch,after_q_values):
+def policy_gradient_obain(task_specific_policy,after_batch,after_q_values):
     actions = torch.Tensor(np.array(np.concatenate(after_batch.action, 0)))
     states = torch.Tensor(np.array(after_batch.state))
-    fixed_action_means, fixed_action_log_stds, fixed_action_stds = task_specific_policy_copy(Variable(states))
+    fixed_action_means, fixed_action_log_stds, fixed_action_stds = task_specific_policy(Variable(states))
     fixed_log_prob = normal_log_density(Variable(actions), fixed_action_means, fixed_action_log_stds, fixed_action_stds).detach().clone().data
     afteradap_action_means, afteradap_action_log_stds, afteradap_action_stds = task_specific_policy(Variable(states))
     log_prob = normal_log_density(Variable(actions), afteradap_action_means, afteradap_action_log_stds, afteradap_action_stds)
@@ -214,10 +216,10 @@ def policy_gradient_obain(task_specific_policy,task_specific_policy_copy,after_b
     #bbbbb=Variable(after_q_values)*torch.special.expit(2.0*AAAAA-2.0)*2
     
     J_loss = (-bbbbb).mean()
-    #meta_grads_list = torch.autograd.grad(J_loss, meta_policy_net.parameters(), retain_graph=False)
-    #meta_policy_grad = [grad2.data.clone() for grad2 in meta_grads_list]
+    meta_grads_list = torch.autograd.grad(J_loss, task_specific_policy.parameters(), retain_graph=False)
+    meta_policy_grad = [grad2.data.clone() for grad2 in meta_grads_list]
 
-    return J_loss #, meta_policy_grad
+    return J_loss, meta_policy_grad
 
 
 if __name__ == "__main__":
@@ -244,10 +246,8 @@ if __name__ == "__main__":
         print("meta_lr: ",meta_lr)
 
         batch_list=[]
-        bath_after_list=[]
-        task_specific_policy_list=[]
-        task_specific_policy_copy_list=[]
-        q_values_after_list=[]
+        new_parameter_withgrad1_list=[]
+        gradient_main_list=[]
         
         for task_number in range(args.task_batch_size):
             target_v=setting_reward()
@@ -262,22 +262,18 @@ if __name__ == "__main__":
             task_specific_policy=Policy(num_inputs, num_actions)
             for i,param in enumerate(task_specific_policy.parameters()):
                 param.data.copy_(list(meta_policy_net.parameters())[i].clone().detach().data)
-            task_specific_policy=task_specific_adaptation(task_specific_policy,meta_policy_net,batch,q_values1,meta_lr)
-            task_specific_policy_copy=Policy(num_inputs, num_actions)
-            for i,param in enumerate(task_specific_policy_copy.parameters()):
-                param.data.copy_(list(task_specific_policy.parameters())[i].clone().detach().data)
+            task_specific_policy,new_parameter_withgrad1=task_specific_adaptation(task_specific_policy,meta_policy_net,batch,q_values1,meta_lr)
 
-            after_batch,after_batch_extra,after_accumulated_raward_batch=sample_data_for_task_specific(target_v,task_specific_policy_copy,args.batch_size*5) 
+            after_batch,after_batch_extra,after_accumulated_raward_batch=sample_data_for_task_specific(target_v,task_specific_policy,args.batch_size*5) 
             print('(after adaptation) Episode {}\tAverage reward {:.2f}'.format(i_episode, after_accumulated_raward_batch)) 
 
             q_values_after = compute_adavatage(after_batch,after_batch_extra,args.batch_size*5) 
             q_values_after = (q_values_after - q_values_after.mean()) 
+            _,gradient_main= policy_gradient_obain(task_specific_policy,after_batch,q_values_after) 
 
             batch_list.append(batch)
-            bath_after_list.append(after_batch)
-            task_specific_policy_list.append(task_specific_policy)
-            task_specific_policy_copy_list.append(task_specific_policy_copy)
-            q_values_after_list.append(q_values_after)
+            gradient_main_list.append(gradient_main)
+            new_parameter_withgrad1_list.append(new_parameter_withgrad1)
 
         
         def get_loss(volatile=False):
@@ -285,12 +281,11 @@ if __name__ == "__main__":
 
             for task_number in range(args.task_batch_size):
                 
-                task_specific_policy=task_specific_policy_list[task_number]
-                task_specific_policy_copy=task_specific_policy_copy_list[task_number]
-                after_batch=bath_after_list[task_number]
-                q_values_after=q_values_after_list[task_number]
-                meta_loss= policy_gradient_obain(task_specific_policy,task_specific_policy_copy,after_batch,q_values_after)
-            
+                gradient_main=gradient_main_list[task_number]
+                new_parameter_withgrad1=new_parameter_withgrad1_list[task_number]
+                flat_gradient_main = torch.cat([grad.contiguous().view(-1) for grad in gradient_main])
+                flat_new_parameter_withgrad1=torch.cat([param.contiguous().view(-1) for param in new_parameter_withgrad1])
+                meta_loss = (flat_gradient_main * flat_new_parameter_withgrad1).sum() 
                 overall_loss=overall_loss+1.0/args.task_batch_size* meta_loss
 
             return overall_loss
