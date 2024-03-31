@@ -29,7 +29,7 @@ parser.add_argument('--tau', type=float, default=0.97, metavar='G',
                     help='gae (default: 0.97)')
 parser.add_argument('--meta-reg', type=float, default=0.001, metavar='G',
                     help='meta regularization regression (default: 1.0)') 
-parser.add_argument('--meta-lambda', type=float, default=1.0, metavar='G', 
+parser.add_argument('--meta-lambda', type=float, default=0.5, metavar='G', 
                     help='meta meta-lambda (default: 0.5)')  
 parser.add_argument('--max-kl', type=float, default=3e-2, metavar='G',
                     help='max kl value (default: 1e-2)')
