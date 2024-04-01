@@ -198,7 +198,7 @@ def task_specific_adaptation_nograd(task_specific_policy,meta_policy_net,batch,q
 
     grads_list = torch.autograd.grad(loss, meta_policy_net.parameters(), retain_graph=False)
     for i,param in enumerate(task_specific_policy.parameters()):
-        param.data = list(meta_policy_net.parameters())[i] - meta_lr * grads_list[i].data
+        param.data = list(meta_policy_net.parameters())[i].data - meta_lr * grads_list[i].data
 
     return task_specific_policy
 
