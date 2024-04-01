@@ -152,7 +152,11 @@ if __name__ == "__main__":
             task_specific_policy=Policy(num_inputs, num_actions)
             for i,param in enumerate(task_specific_policy.parameters()):
                 param.data.copy_(list(previous_policy_net.parameters())[i].clone().detach().data)
-            task_specific_policy=task_specific_adaptation_nograd(task_specific_policy,previous_policy_net,batch,q_values,meta_lr)
+
+            lr=meta_lr
+            if iteration_number>0:
+                lr=meta_lr*0.5  
+            task_specific_policy=task_specific_adaptation_nograd(task_specific_policy,previous_policy_net,batch,q_values,lr)
             for i,param in enumerate(previous_policy_net.parameters()):
                 param.data.copy_(list(task_specific_policy.parameters())[i].clone().detach().data)
     

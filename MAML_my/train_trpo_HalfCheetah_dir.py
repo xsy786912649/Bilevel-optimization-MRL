@@ -29,8 +29,8 @@ parser.add_argument('--tau', type=float, default=0.97, metavar='G',
                     help='gae (default: 0.97)')
 parser.add_argument('--meta-lr', type=float, default=0.1, metavar='G',
                     help='meta lr (default: 0.1)') 
-parser.add_argument('--max-kl', type=float, default=1e-2, metavar='G',
-                    help='max kl value (default: 1e-2)')
+parser.add_argument('--max-kl', type=float, default=3e-2, metavar='G',
+                    help='max kl value (default: 3e-2)')
 parser.add_argument('--damping', type=float, default=0e-5, metavar='G',
                     help='damping (default: 0e-1)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',

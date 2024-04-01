@@ -15,10 +15,10 @@ import pickle
 
 from copy import deepcopy
 
-from train_trpo_Ant_vel import model_lower,args,env,index,num_inputs, num_actions,select_action_test,select_action,compute_adavatage,task_specific_adaptation
+from train_trpo_Ant_vel import args,env,num_inputs, num_actions,select_action_test,select_action,compute_adavatage,task_specific_adaptation_nograd
 
 running_state=0
-with open("./check_point/running_state_Ant_vel_"+str(index)+".pkl",'rb') as file:
+with open("./check_point/running_state_Ant_vel_maml.pkl",'rb') as file:
     running_state  = pickle.loads(file.read())
 
 def sample_data_for_task_specific(target_v,policy_net,batch_size):
@@ -88,9 +88,9 @@ def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
             action = select_action_test(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward, done, truncated, info = env.step(action)
-            reward=-abs(info['x_velocity']-target_v)-0.5 * 1e-1 * np.sum(np.square(action))
+            reward=-abs(info['x_velocity']-target_v)+0.05+1.0+info["reward_ctrl"]* 1e-2
             reward_sum += reward
-            next_state = running_state(next_state)
+            next_state = running_state(next_state)   
             path_number = i
 
             memory.push(state, np.array([action]), path_number, next_state, reward)
@@ -111,12 +111,11 @@ def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
 
 if __name__ == "__main__":
 
-    meta_policy_net = torch.load("./check_point/meta_policy_net_Ant_vel_"+str(index)+".pkl")
+    meta_policy_net = torch.load("./check_point/meta_policy_net_Ant_vel_maml.pkl")
 
-    meta_lambda_now=args.meta_lambda
-    print(meta_lambda_now)
-    print(model_lower, "running_state: ",running_state.rs.n) 
-    print("index: ", index)
+    meta_lr=args.meta_lr
+    print(meta_lr)
+    print("running_state: ",running_state.rs.n) 
 
     accumulated_raward_k_adaptation=[[],[],[],[]]
     accumulated_raward_k_adaptation2=[[],[],[],[]]
@@ -150,8 +149,11 @@ if __name__ == "__main__":
             task_specific_policy=Policy(num_inputs, num_actions)
             for i,param in enumerate(task_specific_policy.parameters()):
                 param.data.copy_(list(previous_policy_net.parameters())[i].clone().detach().data)
-            task_specific_policy=task_specific_adaptation(task_specific_policy,previous_policy_net,batch,q_values,meta_lambda_now,index)
-
+            lr=meta_lr
+            if iteration_number>0:
+                lr=meta_lr*0.5  
+            task_specific_policy=task_specific_adaptation_nograd(task_specific_policy,previous_policy_net,batch,q_values,lr)
+            
             for i,param in enumerate(previous_policy_net.parameters()):
                 param.data.copy_(list(task_specific_policy.parameters())[i].clone().detach().data)
     

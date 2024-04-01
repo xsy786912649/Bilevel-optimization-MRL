@@ -87,8 +87,8 @@ def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
         for t in range(args.max_length):
             action = select_action_test(state,policy_net)
             action = action.data[0].numpy()
-            next_state, reward, done, truncated, info = env.step(action)
-            reward=-abs(info['x_velocity']-target_v)-0.5 * 1e-1 * np.sum(np.square(action))
+            next_state, reward_ori, done, truncated, info = env.step(action)
+            reward=-abs(info['x_velocity']-target_v)+0.05+1.0+info["reward_ctrl"]* 1e-2
             reward_sum += reward
             next_state = running_state(next_state)
             path_number = i
