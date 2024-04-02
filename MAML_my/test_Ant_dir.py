@@ -37,7 +37,7 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v+0.05+1.0+info["reward_ctrl"]* 1e-2 
+            reward=info['x_velocity']*target_v+0.05+info["reward_survive"]+info["reward_ctrl"]* 1e-2 
             reward_sum += reward
             next_state = running_state(next_state)
             path_number = i
@@ -46,15 +46,15 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            if done or truncated:
-                break
+            #if done or truncated:
+            #    break
     
         env._elapsed_steps=0
         for t in range(args.max_length):
             action = select_action(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward, done, truncated, info= env.step(action)
-            reward=info['x_velocity']*target_v+0.05+1.0+info["reward_ctrl"]* 1e-2
+            reward=info['x_velocity']*target_v+0.05+info["reward_survive"]+info["reward_ctrl"]* 1e-2
             next_state = running_state(next_state)
             path_number = i
 
@@ -62,8 +62,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            if done or truncated:
-                break
+            #if done or truncated:
+            #    break
 
         num_episodes += 1
         accumulated_raward_batch += reward_sum
@@ -88,7 +88,7 @@ def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
             action = select_action_test(state,policy_net)
             action = action.data[0].numpy()
             next_state, reward_ori, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v+0.05+1.0+info["reward_ctrl"]* 1e-2
+            reward=info['x_velocity']*target_v+0.05+info["reward_survive"]+info["reward_ctrl"]* 1e-2
             reward_sum += reward
             next_state = running_state(next_state)
             path_number = i
