@@ -96,7 +96,7 @@ def update_params(batch,batch_extra,batch_size):
             if not int(path_numbers_extra[i].item())==k:
                 k=k-1
                 assert k==path_numbers_extra[i].item()
-            prev_return[k,0]=rewards[i]+ args.gamma * prev_return[k,0] 
+            prev_return[k,0]=rewards_extra[i]+ args.gamma * prev_return[k,0] 
             
         for i in reversed(range(rewards.size(0))):
             returns[i] = rewards[i] + args.gamma * prev_return[int(path_numbers[i].item()),0]

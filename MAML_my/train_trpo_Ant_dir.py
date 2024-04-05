@@ -29,7 +29,7 @@ parser.add_argument('--tau', type=float, default=0.97, metavar='G',
                     help='gae (default: 0.97)')
 parser.add_argument('--meta-lr', type=float, default=0.1, metavar='G',
                     help='meta lr (default: 0.1)') 
-parser.add_argument('--max-kl', type=float, default=3e-2, metavar='G',
+parser.add_argument('--max-kl', type=float, default=3e-3, metavar='G',
                     help='max kl value (default: 3e-2)')
 parser.add_argument('--damping', type=float, default=0e-5, metavar='G',
                     help='damping (default: 0e-1)')
@@ -100,8 +100,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            #if done or truncated:
-            #    break
+            if done or truncated:
+                break
     
         env._elapsed_steps=0
         for t in range(args.max_length):
@@ -116,8 +116,8 @@ def sample_data_for_task_specific(target_v,policy_net,batch_size):
             if args.render:
                 env.render()
             state = next_state
-            #if done or truncated:
-            #    break
+            if (done or truncated) and t>0:
+                break
 
         num_episodes += 1
         accumulated_raward_batch += reward_sum
@@ -148,7 +148,7 @@ def compute_adavatage(batch,batch_extra,batch_size):
         if not int(path_numbers_extra[i].item())==k:
             k=k-1
             assert k==path_numbers_extra[i].item()
-        prev_return[k,0]=rewards[i]+ args.gamma * prev_return[k,0] 
+        prev_return[k,0]=rewards_extra[i]+ args.gamma * prev_return[k,0] 
         
     for i in reversed(range(rewards.size(0))):
         returns[i] = rewards[i] + args.gamma * prev_return[int(path_numbers[i].item()),0]

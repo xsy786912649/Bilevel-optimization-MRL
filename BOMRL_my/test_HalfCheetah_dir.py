@@ -15,64 +15,11 @@ import pickle
 
 from copy import deepcopy
 
-from train_trpo_HalfCheetah_dir import model_lower,args,env,index,num_inputs, num_actions,select_action_test,select_action,compute_adavatage,task_specific_adaptation
+from train_trpo_HalfCheetah_dir import model_lower,args,env,index,num_inputs, num_actions,select_action_test,select_action,compute_adavatage,task_specific_adaptation,sample_data_for_task_specific
 
 running_state=0
 with open("./check_point/running_state_HalfCheetah_dir_"+str(index)+".pkl",'rb') as file:
     running_state  = pickle.loads(file.read())
-
-def sample_data_for_task_specific(target_v,policy_net,batch_size):
-    
-    memory = Memory()
-    memory_extra=Memory()
-
-    accumulated_raward_batch = 0
-    num_episodes = 0
-    for i in range(batch_size):
-        state = env.reset()[0]
-        state = running_state(state)
-
-        reward_sum = 0
-        for t in range(args.max_length):
-            action = select_action(state,policy_net)
-            action = action.data[0].numpy()
-            next_state, reward, done, truncated, info = env.step(action)
-            reward=info['x_velocity']*target_v-0.5 * 1e-1 * np.sum(np.square(action))
-            reward_sum += reward
-            next_state = running_state(next_state)
-            path_number = i
-
-            memory.push(state, np.array([action]), path_number, next_state, reward)
-            if args.render:
-                env.render()
-            state = next_state
-            if done or truncated:
-                break
-    
-        env._elapsed_steps=0
-        for t in range(args.max_length):
-            action = select_action(state,policy_net)
-            action = action.data[0].numpy()
-            next_state, reward, done, truncated, info= env.step(action)
-            reward=info['x_velocity']*target_v-0.5 * 1e-1 * np.sum(np.square(action))
-            next_state = running_state(next_state)
-            path_number = i
-
-            memory_extra.push(state, np.array([action]), path_number, next_state, reward)
-            if args.render:
-                env.render()
-            state = next_state
-            if done or truncated:
-                break
-
-        num_episodes += 1
-        accumulated_raward_batch += reward_sum
-
-    accumulated_raward_batch /= num_episodes
-    batch = memory.sample()
-    batch_extra = memory_extra.sample()
-
-    return batch,batch_extra,accumulated_raward_batch
 
 def sample_data_for_task_specific_test(target_v,policy_net,batch_size):
     memory = Memory()
